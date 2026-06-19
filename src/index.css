@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+/*
+ * App theme tokens. Kept as plain CSS custom properties so they work with or
+ * without Tailwind utility classes (and can be read by non-Tailwind CSS).
+ * The old scaffold's default theme has been trimmed to what the app uses.
+ */
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #ffffff;
+  --border: #e5e4e7;
+  --accent: #aa3bff;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/1.45 var(--sans);
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --accent: #c084fc;
+  }
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100svh;
+  gap: 8px;
+}
+
+.app-shell h1 {
+  margin: 0;
+  font-size: clamp(40px, 8vw, 64px);
+  letter-spacing: -1.5px;
+  color: var(--text-h);
+}

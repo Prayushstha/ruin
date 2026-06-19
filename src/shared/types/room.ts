@@ -1,16 +1,8 @@
-/**
- * A room is one session: one host, one group of friends, a live lifecycle
- * that can mix rounds of both games. This file models the shared room state
- * machine described in idea.md, independent of any specific game's round.
- *
- *   LOBBY → PROFILE_COLLECTION → ROUND_INTRO →
- *   RESPONSE_OR_QUESTION_PHASE → VOTING_PHASE → REVEAL →
- *   SCOREBOARD → (next round, or back to LOBBY)
- *
- * Note: we use a `const` object + derived type rather than an `enum` so the
- * config's `erasableSyntaxOnly` rule is satisfied (enums aren't erasable).
- */
-export const GamePhase = {
+// Room lifecycle + state. Phase strings MUST match the `room_phase` Postgres
+// enum in 0001_rooms.sql. const object + derived type (no TS enum — this
+// project forbids non-erasable syntax).
+
+export const RoomPhase = {
   Lobby: 'LOBBY',
   ProfileCollection: 'PROFILE_COLLECTION',
   RoundIntro: 'ROUND_INTRO',
@@ -20,20 +12,21 @@ export const GamePhase = {
   Scoreboard: 'SCOREBOARD',
 } as const
 
-export type GamePhase = (typeof GamePhase)[keyof typeof GamePhase]
+export type RoomPhase = (typeof RoomPhase)[keyof typeof RoomPhase]
 
-/**
- * Opaque room join code, e.g. "RUIN-42". Branded so it can't be silently
- * swapped with any string — it's a user-facing token that gets validated.
- */
-export type RoomCode = string & { readonly __brand: 'RoomCode' }
-
-/** One game session. */
 export interface Room {
   id: string
-  code: RoomCode
+  code: string
   hostId: string
-  phase: GamePhase
-  playerIds: string[]
+  phase: RoomPhase
   createdAt: string
+}
+
+export interface RoomPlayer {
+  id: string
+  roomId: string
+  playerId: string
+  displayName: string
+  joinedAt: string
+  isConnected: boolean
 }

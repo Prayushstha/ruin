@@ -1,60 +1,109 @@
 @import 'tailwindcss';
 
 /*
- * App theme tokens. Kept as plain CSS custom properties so they work with or
- * without Tailwind utility classes (and can be read by non-Tailwind CSS).
- * The old scaffold's default theme has been trimmed to what the app uses.
+ * ruin — hand-drawn / notebook aesthetic.
+ *
+ * The look is "doodled on cream paper": warm paper background, faint ruled
+ * lines, ink-colored strokes. All visual decisions live here as tokens so
+ * components stay markup-only and the palette can be retuned in one place.
  */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #ffffff;
-  --border: #e5e4e7;
-  --accent: #aa3bff;
+  /* Paper */
+  --paper: #fbf6e9;
+  --paper-shade: #f3ecd8;
+  --rule-line: rgba(56, 70, 92, 0.12); /* faint horizontal ruled lines */
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Ink — the palette from the reference, kept tight */
+  --ink: #2b2a33;
+  --ink-soft: #5b5868;
+  --ink-accent: #c0392b; /* red marker */
+  --ink-blue: #2f5d8a;
+  --ink-green: #4a7c3a;
+  --ink-purple: #7a4ea8;
 
-  font: 18px/1.45 var(--sans);
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  /* Fonts */
+  --font-hand: 'Patrick Hand', 'Comic Sans MS', cursive;
+  --font-mark: 'Permanent Marker', 'Patrick Hand', cursive;
+  --font-casual: 'Caveat', 'Patrick Hand', cursive;
+
+  font-family: var(--font-hand);
+  font-size: 20px;
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--paper);
+  color-scheme: light;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --accent: #c084fc;
-  }
+  text-rendering: optimizeLegibility;
 }
 
 body {
   margin: 0;
+  min-height: 100svh;
 }
 
+/*
+ * Notebook paper: the ruled lines are a repeating horizontal gradient. The
+ * margin red line sits 64px from the left, like a real notebook page.
+ */
 #root {
   min-height: 100svh;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 35px,
+    var(--rule-line) 35px,
+    var(--rule-line) 36px
+  );
+  background-position: 0 8px;
 }
 
-.app-shell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100svh;
-  gap: 8px;
+/* The red margin rule, drawn once down the left of the app. */
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 0 64px;
+  width: 1px;
+  background: rgba(192, 57, 43, 0.25);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.app-shell h1 {
+h1,
+h2,
+h3 {
   margin: 0;
-  font-size: clamp(40px, 8vw, 64px);
-  letter-spacing: -1.5px;
-  color: var(--text-h);
+  color: var(--ink);
+  font-weight: normal;
+}
+
+h1 {
+  font-family: var(--font-mark);
+  font-size: clamp(40px, 9vw, 72px);
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+h2 {
+  font-family: var(--font-mark);
+  font-size: clamp(28px, 5vw, 40px);
+}
+
+button,
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+/* Keep sketch strokes above the paper texture. */
+#root > * {
+  position: relative;
+  z-index: 1;
 }

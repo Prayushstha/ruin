@@ -24,13 +24,13 @@ export function NameEntry({ onEnter }: NameEntryProps) {
   const [mode, setMode] = useState<'choose' | 'join'>('choose')
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy] = useState<null | 'create' | 'join'>(null)
 
-  const canAct = name.trim().length > 0 && !busy
+  const canAct = name.trim().length > 0 && busy === null
 
   const handleCreate = async () => {
     if (!canAct) return
-    setBusy(true)
+    setBusy('create')
     setError(null)
     try {
       const identity = setIdentity(name)
@@ -40,13 +40,13 @@ export function NameEntry({ onEnter }: NameEntryProps) {
     } catch {
       setError('could not create the room — try again')
     } finally {
-      setBusy(false)
+      setBusy(null)
     }
   }
 
   const handleJoin = async () => {
     if (!canAct || !code.trim()) return
-    setBusy(true)
+    setBusy('join')
     setError(null)
     try {
       const identity = setIdentity(name)
@@ -71,7 +71,7 @@ export function NameEntry({ onEnter }: NameEntryProps) {
           : 'could not join the room — try again',
       )
     } finally {
-      setBusy(false)
+      setBusy(null)
     }
   }
 
@@ -108,7 +108,7 @@ export function NameEntry({ onEnter }: NameEntryProps) {
                 disabled={!canAct}
                 onClick={handleCreate}
               >
-                create a room
+                {busy === 'create' ? 'making the room…' : 'create a room'}
               </SketchButton>
               <SketchButton
                 seed={23}
@@ -139,7 +139,7 @@ export function NameEntry({ onEnter }: NameEntryProps) {
                   disabled={!canAct || !code.trim()}
                   onClick={handleJoin}
                 >
-                  join
+                  {busy === 'join' ? 'joining…' : 'join'}
                 </SketchButton>
                 <button
                   type="button"

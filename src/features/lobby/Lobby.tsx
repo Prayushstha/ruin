@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Sketch } from '@/shared/components/Sketch'
 import { SketchButton } from '@/shared/components/SketchButton'
+import { Loader } from '@/shared/components/Loader'
 import { leaveRoom, startGame } from '@/api'
 import type { Identity } from '@/shared/lib/identity'
 import { clearCurrentRoom } from '@/shared/lib/currentRoom'
@@ -32,18 +33,25 @@ export function Lobby({
   const { room, players } = useRoomState(roomId, identity.id)
   useAutoPromoteHost(room, players, identity.id)
 
+  const [starting, setStarting] = useState(false)
+
   // Follow the DB's host_id once the room loads; fall back to entry state.
   const amHost = room ? room.hostId === identity.id : isHost
 
   const [copied, setCopied] = useState(false)
   const connectedCount = players.filter((p) => p.isConnected).length
   const need = Math.max(0, MIN_PLAYERS - connectedCount)
-  const canStart = need === 0
+  const canStart = need === 0 && !starting
 
   const handleStart = async () => {
     if (!canStart || !room) return
-    await startGame(room.id)
-    onStarted?.()
+    setStarting(true)
+    try {
+      await startGame(room.id)
+      onStarted?.()
+    } catch {
+      setStarting(false)
+    }
   }
 
   const handleLeave = async () => {
@@ -66,6 +74,15 @@ export function Lobby({
   useEffect(() => {
     if (room && room.phase !== 'LOBBY') onStarted?.()
   }, [room, onStarted])
+
+  // Room still loading — show the loader instead of an empty lobby.
+  if (!room) {
+    return (
+      <div style={pageStyle}>
+        <Loader label="connecting…" />
+      </div>
+    )
+  }
 
   return (
     <div style={pageStyle}>
@@ -119,7 +136,7 @@ export function Lobby({
           disabled={!canStart}
           onClick={handleStart}
         >
-          start the game
+          {starting ? 'starting…' : 'start the game'}
         </SketchButton>
       ) : (
         <p style={{ color: 'var(--ink-soft)' }}>

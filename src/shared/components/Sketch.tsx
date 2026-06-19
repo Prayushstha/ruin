@@ -24,10 +24,12 @@ export function Sketch({
     <div
       ref={ref}
       className={className}
-      style={{ position: 'relative', padding: '20px', ...style }}
+      style={{ position: 'relative', padding: '28px', zIndex: 0, ...style }}
       {...rest}
     >
-      {children}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        {children}
+      </div>
     </div>
   )
 }

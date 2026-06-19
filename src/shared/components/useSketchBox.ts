@@ -24,17 +24,9 @@ export function useSketchBox(
     svg.setAttribute('aria-hidden', 'true')
     svg.style.cssText =
       'position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0;'
-    el.appendChild(svg)
+    el.insertBefore(svg, el.firstChild)
 
     const rc = rough.svg(svg)
-
-    // Content sits above the stroke.
-    Array.from(el.children).forEach((child) => {
-      if (child !== svg) {
-        ;(child as HTMLElement).style.position = 'relative'
-        ;(child as HTMLElement).style.zIndex = '1'
-      }
-    })
 
     const draw = () => {
       const { width, height } = el.getBoundingClientRect()

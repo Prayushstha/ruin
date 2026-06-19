@@ -19,7 +19,7 @@ type Screen =
 function App() {
   const [screen, setScreen] = useState<Screen>(() => initialScreen())
 
-  // Verify stored room still exists. If not, drop back to entry.
+  // Verify stored room still exists on mount. If not, drop back to entry.
   useEffect(() => {
     if (screen.name === 'lobby') {
       void getRoom(screen.roomId).catch(() => {
@@ -27,7 +27,8 @@ function App() {
         setScreen({ name: 'entry' })
       })
     }
-  }, [screen])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   switch (screen.name) {
     case 'entry':

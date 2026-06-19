@@ -9,7 +9,6 @@ import type { Room, RoomPlayer } from '@/shared/types'
 export function useAutoPromoteHost(
   room: Room | null,
   players: RoomPlayer[],
-  myPlayerId: string,
 ) {
   const lastPromoted = useRef<string | null>(null)
 
@@ -28,5 +27,5 @@ export function useAutoPromoteHost(
 
     lastPromoted.current = nextHost.playerId
     void promoteHost(room.id, nextHost.playerId)
-  }, [room, players, myPlayerId])
+  }, [room, players])
 }

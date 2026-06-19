@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Sketch } from '@/shared/components/Sketch'
 import { SketchButton } from '@/shared/components/SketchButton'
+import { Doodles } from '@/shared/components/Doodles'
 import { createRoom, joinRoom, RoomError } from '@/api'
-import { setIdentity, type Identity } from '@/shared/lib/identity'
+import { getIdentity, setIdentity, type Identity } from '@/shared/lib/identity'
 import { setCurrentRoom } from '@/shared/lib/currentRoom'
 
 // Name entry → create or join a room. Identity is name-only, no auth.
@@ -33,7 +34,8 @@ export function NameEntry({ onEnter }: NameEntryProps) {
     setBusy('create')
     setError(null)
     try {
-      const identity = setIdentity(name)
+      const existing = getIdentity()
+      const identity = existing?.name === name.trim() ? existing : setIdentity(name)
       const { room } = await createRoom(identity.id, identity.name)
       setCurrentRoom({ roomId: room.id, code: room.code })
       onEnter({ identity, roomId: room.id, code: room.code, isHost: true })
@@ -49,7 +51,8 @@ export function NameEntry({ onEnter }: NameEntryProps) {
     setBusy('join')
     setError(null)
     try {
-      const identity = setIdentity(name)
+      const existing = getIdentity()
+      const identity = existing?.name === name.trim() ? existing : setIdentity(name)
       const { room, nameUsed } = await joinRoom(
         code.trim(),
         identity.id,
@@ -77,20 +80,21 @@ export function NameEntry({ onEnter }: NameEntryProps) {
 
   return (
     <div style={pageStyle}>
-      <header style={{ textAlign: 'center' }}>
+      <Doodles variant="welcome" />
+      <header style={{ textAlign: 'center', marginBottom: 8 }}>
         <h1>ruin</h1>
-        <p style={{ color: 'var(--ink-soft)', marginTop: 4 }}>
+        <p style={{ color: 'var(--ink-soft)', marginTop: 8, fontSize: '1.1em' }}>
           game night for friend groups
         </p>
       </header>
 
-      <Sketch style={{ width: 'min(440px, 100%)' }} seed={7}>
+      <Sketch style={{ width: 'min(680px, 92vw)' }} seed={7}>
         <form
           onSubmit={(e) => e.preventDefault()}
-          style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
         >
           <label style={fieldStyle}>
-            <span>what should we call you?</span>
+            <span style={{ fontSize: '1.05em' }}>what should we call you?</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -101,8 +105,9 @@ export function NameEntry({ onEnter }: NameEntryProps) {
           </label>
 
           {mode === 'choose' && (
-            <div style={rowStyle}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <SketchButton
+                block
                 seed={11}
                 stroke="var(--ink-accent)"
                 disabled={!canAct}
@@ -111,6 +116,7 @@ export function NameEntry({ onEnter }: NameEntryProps) {
                 {busy === 'create' ? 'making the room…' : 'create a room'}
               </SketchButton>
               <SketchButton
+                block
                 seed={23}
                 stroke="var(--ink-blue)"
                 disabled={!canAct}
@@ -124,7 +130,7 @@ export function NameEntry({ onEnter }: NameEntryProps) {
           {mode === 'join' && (
             <>
               <label style={fieldStyle}>
-                <span>room code</span>
+                <span style={{ fontSize: '1.05em' }}>room code</span>
                 <input
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -132,8 +138,9 @@ export function NameEntry({ onEnter }: NameEntryProps) {
                   style={{ ...inputStyle, textTransform: 'uppercase' }}
                 />
               </label>
-              <div style={{ ...rowStyle, alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <SketchButton
+                  block
                   seed={23}
                   stroke="var(--ink-blue)"
                   disabled={!canAct || !code.trim()}
@@ -188,17 +195,12 @@ const fieldStyle = {
 }
 
 const inputStyle = {
-  padding: '10px 12px',
+  padding: '14px 16px',
+  fontSize: '1.15em',
   border: 'none',
   borderBottom: '2px dashed var(--ink-soft)',
   background: 'transparent',
   outline: 'none',
-}
-
-const rowStyle = {
-  display: 'flex',
-  gap: 16,
-  justifyContent: 'center',
 }
 
 const linkButtonStyle = {
@@ -207,7 +209,8 @@ const linkButtonStyle = {
   color: 'var(--ink-soft)',
   cursor: 'pointer',
   textDecoration: 'underline',
-  fontSize: '0.9em',
+  fontSize: '0.95em',
+  alignSelf: 'center' as const,
 }
 
 const errorStyle = {

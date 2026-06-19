@@ -29,10 +29,17 @@ export function useRoomState(roomId: string, playerId: string) {
     const unsubPlayers = subscribeToPlayers(roomId, setPlayers)
     const unsubRoom = subscribeToRoom(roomId, setRoom)
 
+    // Mark disconnected on hard refresh / tab close.
+    const handleBeforeUnload = () => {
+      void setConnected(roomId, playerId, false)
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
     return () => {
       alive = false
       unsubPlayers()
       unsubRoom()
+      window.removeEventListener('beforeunload', handleBeforeUnload)
       void setConnected(roomId, playerId, false)
     }
   }, [roomId, playerId])

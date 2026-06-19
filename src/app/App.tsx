@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NameEntry, type EnteredRoom } from '@/features/lobby/NameEntry'
 import { Lobby } from '@/features/lobby/Lobby'
 import type { Identity } from '@/shared/lib/identity'
@@ -7,6 +7,7 @@ import {
   getCurrentRoom,
   clearCurrentRoom,
 } from '@/shared/lib/currentRoom'
+import { getRoom } from '@/api'
 
 // App shell — screen union + the data each screen needs. Becomes a real
 // router once there are more than a couple screens.
@@ -17,6 +18,16 @@ type Screen =
 
 function App() {
   const [screen, setScreen] = useState<Screen>(() => initialScreen())
+
+  // Verify stored room still exists. If not, drop back to entry.
+  useEffect(() => {
+    if (screen.name === 'lobby') {
+      void getRoom(screen.roomId).catch(() => {
+        clearCurrentRoom()
+        setScreen({ name: 'entry' })
+      })
+    }
+  }, [screen])
 
   switch (screen.name) {
     case 'entry':

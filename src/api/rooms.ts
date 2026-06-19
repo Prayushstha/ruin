@@ -23,6 +23,7 @@ export class RoomError extends Error {
 
 function toReason(error: { code?: string; message?: string }): RoomErrorReason {
   if (error.code === 'PGRST116') return 'not_found'
+  if (error.code === '23505') return 'duplicate_name'
   return 'unknown'
 }
 
@@ -51,23 +52,35 @@ export async function createRoom(
   hostId: string,
   hostName: string,
 ): Promise<{ room: Room; player: RoomPlayer }> {
-  const code = generateRoomCode()
+  let attempts = 0
+  const MAX_ATTEMPTS = 5
 
-  const { data: roomRow, error: roomErr } = await supabase
-    .from('rooms')
-    .insert({ code, host_id: hostId })
-    .select()
-    .single()
-  if (roomErr) throw new RoomError(toReason(roomErr), roomErr.message)
+  while (attempts < MAX_ATTEMPTS) {
+    const code = generateRoomCode()
 
-  const { data: playerRow, error: playerErr } = await supabase
-    .from('room_players')
-    .insert({ room_id: roomRow.id, player_id: hostId, display_name: hostName })
-    .select()
-    .single()
-  if (playerErr) throw new RoomError(toReason(playerErr), playerErr.message)
+    const { data: roomRow, error: roomErr } = await supabase
+      .from('rooms')
+      .insert({ code, host_id: hostId })
+      .select()
+      .single()
 
-  return { room: toRoom(roomRow), player: toPlayer(playerRow) }
+    if (roomErr?.code === '23505') {
+      attempts++
+      continue
+    }
+    if (roomErr) throw new RoomError(toReason(roomErr), roomErr.message)
+
+    const { data: playerRow, error: playerErr } = await supabase
+      .from('room_players')
+      .insert({ room_id: roomRow.id, player_id: hostId, display_name: hostName })
+      .select()
+      .single()
+    if (playerErr) throw new RoomError(toReason(playerErr), playerErr.message)
+
+    return { room: toRoom(roomRow), player: toPlayer(playerRow) }
+  }
+
+  throw new RoomError('unknown', 'Failed to generate unique room code')
 }
 
 // Refuses to join past the LOBBY phase (late-join rule). Auto-suffixes the
